@@ -37,6 +37,8 @@ func ManufactureSink() (e EventSinkInterface) {
 	switch s {
 	case "glog":
 		e = NewGlogSink()
+	case "elasticsearch":
+		e = NewElasticSearchSink()
 	case "stdout":
 		viper.SetDefault("stdoutJSONNamespace", "")
 		stdoutNamespace := viper.GetString("stdoutJSONNamespace")

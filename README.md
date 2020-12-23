@@ -40,3 +40,11 @@ $ kubectl logs -f deployment/eventrouter -n kube-system
 Watch events roll through the system and hopefully stream into your ES cluster for mining, Hooray!
 
 [kubernetes]: https://github.com/kubernetes/kubernetes/ "Kubernetes"
+
+
+### build
+```bash
+docker build -t .
+docker push 
+
+```

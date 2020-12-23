@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eventrouter
+  namespace: eqxiu-ops
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: eventrouter
+rules:
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: eventrouter
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: eventrouter
+subjects:
+  - kind: ServiceAccount
+    name: eventrouter
+    namespace: eqxiu-ops
+---
+apiVersion: v1
+data:
+  config.json: |-
+    {
+      "sink": "elasticsearch"
+    }
+kind: ConfigMap
+metadata:
+  name: eventrouter-cm
+  namespace: eqxiu-ops
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventrouter
+  namespace: eqxiu-ops
+  labels:
+    app: eventrouter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eventrouter
+  template:
+    metadata:
+      labels:
+        app: eventrouter
+    spec:
+      containers:
+        - name: kube-eventrouter
+          image: ccr.ccs.tencentyun.com/eqxiu/eventrouter:v0.4
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/eventrouter
+      serviceAccount: eventrouter
+      imagePullSecrets:
+        - name: qcloudregistrykey
+      volumes:
+        - name: config-volume
+          configMap:
+            name: eventrouter-cm
